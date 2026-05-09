@@ -128,8 +128,16 @@ router.post('/add', async (req, res, next) => {
 router.post('/delete', async (req, res, next) => {
   try {
     const { projectId, pageId } = req.body;
-    await db.query('DELETE FROM list_elements WHERE project_id = $1 AND page_id = $2', [projectId, pageId]);
-    await db.query('DELETE FROM the_site_map WHERE project_id = $1 AND id = $2',       [projectId, pageId]);
+    // Elimina il nodo e tutti i suoi discendenti (id che iniziano con pageId_)
+    const prefix = pageId + '_%';
+    await db.query(
+      'DELETE FROM list_elements WHERE project_id = $1 AND (page_id = $2 OR page_id LIKE $3)',
+      [projectId, pageId, prefix]
+    );
+    await db.query(
+      'DELETE FROM the_site_map WHERE project_id = $1 AND (id = $2 OR id LIKE $3)',
+      [projectId, pageId, prefix]
+    );
     res.redirect(`/sitemap?projectId=${projectId}`);
   } catch (err) { next(err); }
 });

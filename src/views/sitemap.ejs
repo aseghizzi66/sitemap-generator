@@ -68,7 +68,7 @@ for (const item of allItems) {
 function renderNode(node) {
   const tpl      = node.template || 'def';
   const isLocked = node.locked;
-  const canDelete = node.children.length === 0 && node.id !== '0';
+  const canDelete = node.id !== '0';
   const pid      = project.id;
 
   let h = '';
@@ -88,8 +88,7 @@ function renderNode(node) {
             <button class="act act-add" title="Aggiungi figlio">+</button>
           </form>`;
           if (canDelete) {
-            h += `<form method="POST" action="/sitemap/delete" class="act-form"
-                    onsubmit="return confirm('Eliminare la pagina ${node.id}?')">
+            h += `<form method="POST" action="/sitemap/delete" class="act-form">
               <input type="hidden" name="projectId" value="${pid}">
               <input type="hidden" name="pageId"    value="${node.id}">
               <button class="act act-del" title="Elimina">✕</button>
