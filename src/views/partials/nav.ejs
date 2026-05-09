@@ -1,0 +1,11 @@
+<nav class="nav-bar">
+  <span class="nav-title">Site Map Generator <span class="nav-version">v2.0</span></span>
+  <% if (typeof project !== 'undefined' && project) { %>
+    <span class="nav-project"><%= project.name %><% if (typeof user !== 'undefined' && user && (user.first_name || user.last_name)) { %> &mdash; <%= user.first_name %> <%= user.last_name %><% } %></span>
+    <a href="/sitemap?projectId=<%= project.id %>">Site Map</a>
+    <a href="/templates?projectId=<%= project.id %>">Templates</a>
+    <a href="/report?projectId=<%= project.id %>">Report</a>
+  <% } %>
+  <a href="/" class="nav-home">Home</a>
+</nav>
+<div class="nav-accent-bar"></div>

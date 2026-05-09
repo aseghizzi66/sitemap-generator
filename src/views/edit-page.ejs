@@ -1,0 +1,75 @@
+<%- include('partials/header', { title: 'Modifica pagina ' + page.id }) %>
+
+<%
+const allItems = [...templates, ...elements];
+let dynamicCss = '';
+for (const item of allItems) {
+  dynamicCss += `.badge-${item.name}{background:#${item.color};color:#${item.text_color}}\n`;
+}
+%>
+<style><%= dynamicCss %></style>
+
+<%- include('partials/nav', { project, user: null }) %>
+
+<div class="main-content">
+  <h1 class="page-title">Modifica pagina <code><%= page.id %></code></h1>
+
+  <form method="POST" action="/sitemap/edit" class="edit-form">
+    <input type="hidden" name="projectId" value="<%= project.id %>">
+    <input type="hidden" name="pageId"    value="<%= page.id %>">
+
+    <div class="form-grid">
+
+      <label>Nome pagina</label>
+      <input type="text" name="label" value="<%= page.label %>" maxlength="255" class="field-text" required>
+
+      <label>Versione</label>
+      <input type="text" name="version" value="<%= page.version %>" maxlength="50" class="field-text" placeholder="es. 1.0">
+
+      <label>Scope matrix</label>
+      <input type="text" name="contentMatrix" value="<%= page.content_matrix %>" maxlength="255" class="field-text">
+
+      <label>Descrizione</label>
+      <textarea name="description" class="field-text" rows="3"><%= page.description %></textarea>
+
+      <label>Pagina riservata</label>
+      <label class="checkbox-label">
+        <input type="checkbox" name="locked" value="on" <%= page.locked ? 'checked' : '' %>>
+        <span>Accesso riservato</span>
+      </label>
+
+      <label>Template</label>
+      <select name="template" class="field-select">
+        <option value="def"<%= page.template === 'def' ? ' selected' : '' %>>— nessuno (def) —</option>
+        <% for (const t of templates) { %>
+          <option value="<%= t.name %>" <%= page.template === t.name ? 'selected' : '' %>>
+            <%= t.name %> – <%= t.description %>
+          </option>
+        <% } %>
+      </select>
+
+      <label>Elementi in pagina</label>
+      <div class="elements-list">
+        <% for (const e of elements) { %>
+          <label class="checkbox-label">
+            <input type="checkbox" name="elements" value="<%= e.name %>"
+              <%= pageElements.includes(e.name) ? 'checked' : '' %>>
+            <span class="badge badge-<%= e.name %>"><%= e.name %></span>
+            <span class="el-desc"><%= e.description %></span>
+          </label>
+        <% } %>
+        <% if (elements.length === 0) { %>
+          <span class="muted">Nessun elemento definito. <a href="/templates?projectId=<%= project.id %>" class="link-accent">Aggiungine uno.</a></span>
+        <% } %>
+      </div>
+
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn btn-primary">Salva</button>
+      <a href="/sitemap?projectId=<%= project.id %>" class="btn btn-secondary">Annulla</a>
+    </div>
+  </form>
+</div>
+
+<%- include('partials/footer') %>

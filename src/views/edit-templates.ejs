@@ -1,0 +1,140 @@
+<%- include('partials/header', { title: 'Templates & Elementi' }) %>
+
+<%
+let dynamicCss = '';
+for (const t of templates) dynamicCss += `.badge-${t.name}{background:#${t.color};color:#${t.text_color}}\n`;
+for (const e of elements)  dynamicCss += `.badge-${e.name}{background:#${e.color};color:#${e.text_color}}\n`;
+%>
+<style><%= dynamicCss %></style>
+
+<%- include('partials/nav', { project, user: null }) %>
+
+<div class="main-content">
+
+  <% if (msg) { %><div class="flash"><%= msg %></div><% } %>
+
+  <%/* ── MASTER TEMPLATES ── */%>
+  <h1 class="page-title">Master Templates</h1>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Nome</th><th>Descrizione</th><th>Dettaglio</th>
+        <th>Colore BG</th><th>Colore testo</th><th>Anteprima</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for (const t of templates) { %>
+        <tr>
+          <td><span class="badge badge-<%= t.name %>"><%= t.name %></span></td>
+          <td>
+            <form method="POST" action="/templates/template/edit" class="inline-edit-form">
+              <input type="hidden" name="projectId"  value="<%= project.id %>">
+              <input type="hidden" name="name"       value="<%= t.name %>">
+              <input class="field-text field-sm" type="text" name="description"       value="<%= t.description %>" placeholder="Descrizione">
+              <input class="field-text field-sm" type="text" name="detailDescription" value="<%= t.detail_description %>" placeholder="Dettaglio">
+              <input class="field-color" type="color"  name="color"     value="#<%= t.color %>">
+              <input class="field-color" type="color"  name="textColor" value="#<%= t.text_color %>">
+              <button type="submit" class="btn btn-sm btn-primary">Salva</button>
+            </form>
+          </td>
+          <td></td><td></td><td></td>
+          <td><span class="badge badge-<%= t.name %>">Abc</span></td>
+          <td>
+            <% if (t.name !== 'def') { %>
+              <form method="POST" action="/templates/template/delete"
+                    onsubmit="return confirm('Eliminare il template <%= t.name %>?')">
+                <input type="hidden" name="projectId" value="<%= project.id %>">
+                <input type="hidden" name="name"      value="<%= t.name %>">
+                <button class="btn btn-sm btn-danger">Elimina</button>
+              </form>
+            <% } %>
+          </td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <details class="add-section">
+    <summary class="add-toggle">+ Aggiungi template</summary>
+    <form method="POST" action="/templates/template/add" class="add-form">
+      <input type="hidden" name="projectId" value="<%= project.id %>">
+      <div class="form-grid form-grid-sm">
+        <label>Nome</label>
+        <input type="text" name="name" class="field-text" placeholder="T05" required maxlength="50">
+        <label>Descrizione</label>
+        <input type="text" name="description" class="field-text" placeholder="Descrizione breve">
+        <label>Dettaglio</label>
+        <input type="text" name="detailDescription" class="field-text" placeholder="Note">
+        <label>Colore BG</label>
+        <input type="color" name="color" value="#CCCCCC" class="field-color">
+        <label>Colore testo</label>
+        <input type="color" name="textColor" value="#000000" class="field-color">
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top:8px">Aggiungi</button>
+    </form>
+  </details>
+
+  <hr class="section-sep">
+
+  <%/* ── ELEMENTI ── */%>
+  <h1 class="page-title">Elementi</h1>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Nome</th><th>Descrizione</th><th>Dettaglio</th>
+        <th>Colore BG</th><th>Colore testo</th><th>Anteprima</th><th></th>
+      </tr>
+    </thead>
+    <tbody>
+      <% for (const e of elements) { %>
+        <tr>
+          <td><span class="badge badge-<%= e.name %>"><%= e.name %></span></td>
+          <td>
+            <form method="POST" action="/templates/element/edit" class="inline-edit-form">
+              <input type="hidden" name="projectId"  value="<%= project.id %>">
+              <input type="hidden" name="name"       value="<%= e.name %>">
+              <input class="field-text field-sm" type="text" name="description"       value="<%= e.description %>" placeholder="Descrizione">
+              <input class="field-text field-sm" type="text" name="detailDescription" value="<%= e.detail_description %>" placeholder="Dettaglio">
+              <input class="field-color" type="color"  name="color"     value="#<%= e.color %>">
+              <input class="field-color" type="color"  name="textColor" value="#<%= e.text_color %>">
+              <button type="submit" class="btn btn-sm btn-primary">Salva</button>
+            </form>
+          </td>
+          <td></td><td></td><td></td>
+          <td><span class="badge badge-<%= e.name %>">Abc</span></td>
+          <td>
+            <form method="POST" action="/templates/element/delete"
+                  onsubmit="return confirm('Eliminare l\\'elemento <%= e.name %>?')">
+              <input type="hidden" name="projectId" value="<%= project.id %>">
+              <input type="hidden" name="name"      value="<%= e.name %>">
+              <button class="btn btn-sm btn-danger">Elimina</button>
+            </form>
+          </td>
+        </tr>
+      <% } %>
+    </tbody>
+  </table>
+
+  <details class="add-section">
+    <summary class="add-toggle">+ Aggiungi elemento</summary>
+    <form method="POST" action="/templates/element/add" class="add-form">
+      <input type="hidden" name="projectId" value="<%= project.id %>">
+      <div class="form-grid form-grid-sm">
+        <label>Nome</label>
+        <input type="text" name="name" class="field-text" placeholder="E07" required maxlength="50">
+        <label>Descrizione</label>
+        <input type="text" name="description" class="field-text" placeholder="Descrizione breve">
+        <label>Dettaglio</label>
+        <input type="text" name="detailDescription" class="field-text" placeholder="Note">
+        <label>Colore BG</label>
+        <input type="color" name="color" value="#CCCCCC" class="field-color">
+        <label>Colore testo</label>
+        <input type="color" name="textColor" value="#000000" class="field-color">
+      </div>
+      <button type="submit" class="btn btn-primary" style="margin-top:8px">Aggiungi</button>
+    </form>
+  </details>
+
+</div>
+
+<%- include('partials/footer') %>

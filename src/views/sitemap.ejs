@@ -1,0 +1,139 @@
+<%- include('partials/header', { title: project.name }) %>
+
+<%
+// CSS dinamico: un blocco <style> con le classi generate dai template/elementi
+const allItems = [...templates, ...elements];
+let dynamicCss = '';
+for (const item of allItems) {
+  dynamicCss += `.badge-${item.name}{background:#${item.color};color:#${item.text_color}}` + '\n';
+  dynamicCss += `.card-body-${item.name}{background:#${item.color}22;border-left:3px solid #${item.color}}` + '\n';
+}
+%>
+<style><%= dynamicCss %></style>
+
+<%- include('partials/nav', { project, user }) %>
+
+<div class="info-bar">
+  <div class="info-panels">
+
+    <%/* ── Pannello Templates ── */%>
+    <div class="info-panel">
+      <div class="info-panel-header">
+        Master Templates
+        <a href="/templates?projectId=<%= project.id %>" class="link-accent" style="font-size:11px">EDIT</a>
+      </div>
+      <table class="mini-table">
+        <thead><tr><th>Nome</th><th>Descrizione</th><th>Nr</th></tr></thead>
+        <tbody>
+          <% for (const t of templates) { %>
+            <tr>
+              <td><span class="badge badge-<%= t.name %>"><%= t.name %></span></td>
+              <td><%= t.description %></td>
+              <td class="col-num"><%= t.usage_count %></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <%/* ── Pannello Elementi ── */%>
+    <div class="info-panel">
+      <div class="info-panel-header">
+        Elementi
+        <a href="/templates?projectId=<%= project.id %>" class="link-accent" style="font-size:11px">EDIT</a>
+      </div>
+      <table class="mini-table">
+        <thead><tr><th>Nome</th><th>Descrizione</th><th>Nr</th></tr></thead>
+        <tbody>
+          <% for (const e of elements) { %>
+            <tr>
+              <td><span class="badge badge-<%= e.name %>"><%= e.name %></span></td>
+              <td><%= e.description %></td>
+              <td class="col-num"><%= e.usage_count %></td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<%/* ─────────────────────────────────────────────────────────────
+     TREE — funzione ricorsiva EJS
+────────────────────────────────────────────────────────────── */%>
+<div class="tree-container">
+<%
+
+function renderNode(node) {
+  const tpl      = node.template || 'def';
+  const isLocked = node.locked;
+  const canDelete = node.children.length === 0 && node.id !== '0';
+  const pid      = project.id;
+
+  let h = '';
+  h += `<div class="tree-node-wrap">`;
+
+    // card
+    h += `<div class="tree-card">`;
+
+      // header card
+      h += `<div class="tree-card-head">`;
+        h += `<span class="node-id">${node.id}</span>`;
+        h += `<div class="node-actions">`;
+          h += `<a href="/sitemap/edit?projectId=${pid}&pageId=${encodeURIComponent(node.id)}" class="act act-edit" title="Modifica">EDIT</a>`;
+          h += `<form method="POST" action="/sitemap/add" class="act-form">
+            <input type="hidden" name="projectId" value="${pid}">
+            <input type="hidden" name="pageId"    value="${node.newChildId}">
+            <button class="act act-add" title="Aggiungi figlio">+</button>
+          </form>`;
+          if (canDelete) {
+            h += `<form method="POST" action="/sitemap/delete" class="act-form"
+                    onsubmit="return confirm('Eliminare la pagina ${node.id}?')">
+              <input type="hidden" name="projectId" value="${pid}">
+              <input type="hidden" name="pageId"    value="${node.id}">
+              <button class="act act-del" title="Elimina">✕</button>
+            </form>`;
+          }
+        h += `</div>`;
+      h += `</div>`;
+
+      // body card
+      h += `<div class="tree-card-body card-body-${tpl}">`;
+        if (isLocked) h += `<span class="lock-icon" title="Pagina riservata">🔒</span> `;
+        h += `<span class="card-label">${node.label}</span>`;
+        h += `<div class="card-tpl"><span class="badge badge-${tpl}">${tpl}</span></div>`;
+        if (node.elements && node.elements.length > 0) {
+          h += `<div class="card-elems">`;
+          for (const el of node.elements) {
+            h += `<span class="badge badge-${el}">${el}</span> `;
+          }
+          h += `</div>`;
+        }
+        if (node.version) {
+          h += `<div class="card-ver">v${node.version}</div>`;
+        }
+      h += `</div>`;
+
+    h += `</div>`;
+
+    // ricorsione figli
+    if (node.children && node.children.length > 0) {
+      h += `<div class="tree-children">`;
+      for (const child of node.children) {
+        h += renderNode(child);
+      }
+      h += `</div>`;
+    }
+
+  h += `</div>`;
+  return h;
+}
+
+for (const root of tree) {
+  %><%- renderNode(root) %><%
+}
+%>
+</div>
+
+<%- include('partials/footer') %>

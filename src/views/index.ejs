@@ -1,0 +1,47 @@
+<%- include('partials/header', { title: 'Progetti' }) %>
+<%- include('partials/nav', { project: null, user: null }) %>
+
+<div class="main-content">
+  <h1 class="page-title">Progetti disponibili</h1>
+
+  <% if (projects.length === 0) { %>
+    <p class="muted">Nessun progetto. Creane uno qui sotto.</p>
+  <% } else { %>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Nome progetto</th>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        <% projects.forEach((p, i) => { %>
+          <tr>
+            <td class="col-num"><%= i + 1 %></td>
+            <td><a href="/sitemap?projectId=<%= p.id %>" class="link-accent"><%= p.name %></a></td>
+            <td><a href="/sitemap?projectId=<%= p.id %>" class="btn btn-sm btn-primary">Apri</a></td>
+            <td>
+              <form method="POST" action="/projects/delete" style="display:inline"
+                    onsubmit="return confirm('Eliminare il progetto &quot;<%= p.name %>&quot;?')">
+                <input type="hidden" name="projectId" value="<%= p.id %>">
+                <button type="submit" class="btn btn-sm btn-danger">Elimina</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+
+  <hr class="section-sep">
+
+  <h2 class="section-title">Nuovo progetto</h2>
+  <form method="POST" action="/projects/add" class="inline-form-row">
+    <input type="text" name="name" placeholder="Nome progetto" required class="field-text" style="width:260px">
+    <button type="submit" class="btn btn-primary">Crea</button>
+  </form>
+</div>
+
+<%- include('partials/footer') %>

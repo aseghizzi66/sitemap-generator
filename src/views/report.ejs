@@ -1,0 +1,116 @@
+<%- include('partials/header', { title: 'Report — ' + project.name }) %>
+
+<%
+let dynamicCss = '';
+for (const t of templates) dynamicCss += `.badge-${t.name}{background:#${t.color};color:#${t.text_color}}\n`;
+for (const e of elements)  dynamicCss += `.badge-${e.name}{background:#${e.color};color:#${e.text_color}}\n`;
+%>
+<style><%= dynamicCss %></style>
+
+<%- include('partials/nav', { project, user: null }) %>
+
+<div class="main-content">
+  <h1 class="page-title">Report — <%= project.name %></h1>
+
+  <div class="report-nav">
+    <a href="/report?projectId=<%= project.id %>&table=MTr"
+       class="btn btn-sm <%= currentTable === 'MTr' ? 'btn-primary' : 'btn-secondary' %>">
+      Master Templates
+    </a>
+    <a href="/report?projectId=<%= project.id %>&table=ELr"
+       class="btn btn-sm <%= currentTable === 'ELr' ? 'btn-primary' : 'btn-secondary' %>">
+      Elementi
+    </a>
+    <a href="/report?projectId=<%= project.id %>&table=SMr"
+       class="btn btn-sm <%= currentTable === 'SMr' ? 'btn-primary' : 'btn-secondary' %>">
+      Site Map
+    </a>
+  </div>
+
+  <% if (!reportData) { %>
+    <p class="muted" style="margin-top:24px">Scegli un report dalla barra sopra.</p>
+  <% } %>
+
+  <% if (reportData && reportData.type === 'MTr') { %>
+    <h2 class="section-title"><%= reportData.title %></h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th><th>Nome</th><th>Descrizione</th><th>Dettaglio</th>
+          <th>Colore BG</th><th>Colore testo</th><th>Pagine</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% reportData.rows.forEach((t, i) => { %>
+          <tr>
+            <td class="col-num"><%= i + 1 %></td>
+            <td><span class="badge badge-<%= t.name %>"><%= t.name %></span></td>
+            <td><%= t.description %></td>
+            <td><%= t.detail_description %></td>
+            <td><code>#<%= t.color %></code></td>
+            <td><code>#<%= t.text_color %></code></td>
+            <td class="col-num"><%= t.usage_count %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+
+  <% if (reportData && reportData.type === 'ELr') { %>
+    <h2 class="section-title"><%= reportData.title %></h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th><th>Nome</th><th>Descrizione</th><th>Dettaglio</th>
+          <th>Colore BG</th><th>Colore testo</th><th>Uso in pagine</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% reportData.rows.forEach((e, i) => { %>
+          <tr>
+            <td class="col-num"><%= i + 1 %></td>
+            <td><span class="badge badge-<%= e.name %>"><%= e.name %></span></td>
+            <td><%= e.description %></td>
+            <td><%= e.detail_description %></td>
+            <td><code>#<%= e.color %></code></td>
+            <td><code>#<%= e.text_color %></code></td>
+            <td class="col-num"><%= e.usage_count %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+
+  <% if (reportData && reportData.type === 'SMr') { %>
+    <h2 class="section-title"><%= reportData.title %></h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>#</th><th>ID</th><th>Nome pagina</th><th>Template</th>
+          <th>Versione</th><th>Scope matrix</th><th>Descrizione</th><th>Elementi</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% reportData.rows.forEach((page, i) => { %>
+          <tr>
+            <td class="col-num"><%= i + 1 %></td>
+            <td><code><%= page.id %></code></td>
+            <td><%= page.label %><% if (page.locked) { %> 🔒<% } %></td>
+            <td><span class="badge badge-<%= page.template %>"><%= page.template %></span></td>
+            <td><%= page.version %></td>
+            <td><%= page.content_matrix %></td>
+            <td><%= page.description %></td>
+            <td>
+              <% for (const el of page.elements) { %>
+                <span class="badge badge-<%= el.element %>" title="<%= el.description %>"><%= el.element %></span>
+              <% } %>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  <% } %>
+
+</div>
+
+<%- include('partials/footer') %>
