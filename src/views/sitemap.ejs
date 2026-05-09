@@ -65,6 +65,10 @@ for (const item of allItems) {
 <div class="tree-container">
 <%
 
+const iconEdit = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+const iconAdd  = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
+const iconDel  = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`;
+
 function renderNode(node) {
   const tpl      = node.template || 'def';
   const isLocked = node.locked;
@@ -74,31 +78,34 @@ function renderNode(node) {
   let h = '';
   h += `<div class="tree-node-wrap">`;
 
-    // card
-    h += `<div class="tree-card">`;
+    // colonna: icone sopra, card sotto
+    h += `<div class="tree-card-row">`;
 
-      // header card
-      h += `<div class="tree-card-head">`;
-        h += `<span class="node-id">${node.id}</span>`;
-        h += `<div class="node-actions">`;
-          h += `<a href="/sitemap/edit?projectId=${pid}&pageId=${encodeURIComponent(node.id)}" class="act act-edit" title="Modifica">EDIT</a>`;
-          h += `<form method="POST" action="/sitemap/add" class="act-form">
+      // icone in alto a destra
+      h += `<div class="node-actions">`;
+        h += `<a href="/sitemap/edit?projectId=${pid}&pageId=${encodeURIComponent(node.id)}" class="act act-edit" title="Modifica">${iconEdit}</a>`;
+        h += `<form method="POST" action="/sitemap/add" class="act-form">
+          <input type="hidden" name="projectId" value="${pid}">
+          <input type="hidden" name="pageId"    value="${node.newChildId}">
+          <button class="act act-add" title="Aggiungi figlio">${iconAdd}</button>
+        </form>`;
+        if (canDelete) {
+          h += `<form method="POST" action="/sitemap/delete" class="act-form">
             <input type="hidden" name="projectId" value="${pid}">
-            <input type="hidden" name="pageId"    value="${node.newChildId}">
-            <button class="act act-add" title="Aggiungi figlio">+</button>
+            <input type="hidden" name="pageId"    value="${node.id}">
+            <button class="act act-del" title="Elimina">${iconDel}</button>
           </form>`;
-          if (canDelete) {
-            h += `<form method="POST" action="/sitemap/delete" class="act-form">
-              <input type="hidden" name="projectId" value="${pid}">
-              <input type="hidden" name="pageId"    value="${node.id}">
-              <button class="act act-del" title="Elimina">✕</button>
-            </form>`;
-          }
-        h += `</div>`;
-      h += `</div>`;
+        }
+      h += `</div>`; // node-actions
 
-      // body card
-      h += `<div class="tree-card-body card-body-${tpl}">`;
+      // card
+      h += `<div class="tree-card">`;
+        h += `<div class="tree-card-head">`;
+          h += `<span class="node-id">${node.id}</span>`;
+        h += `</div>`;
+
+        // body card
+        h += `<div class="tree-card-body card-body-${tpl}">`;
         if (isLocked) h += `<span class="lock-icon" title="Pagina riservata">🔒</span> `;
         h += `<span class="card-label">${node.label}</span>`;
         h += `<div class="card-tpl"><span class="badge badge-${tpl}">${tpl}</span></div>`;
@@ -112,9 +119,10 @@ function renderNode(node) {
         if (node.version) {
           h += `<div class="card-ver">v${node.version}</div>`;
         }
-      h += `</div>`;
+      h += `</div>`; // tree-card-body
+      h += `</div>`; // tree-card
 
-    h += `</div>`;
+    h += `</div>`; // tree-card-row
 
     // ricorsione figli
     if (node.children && node.children.length > 0) {
