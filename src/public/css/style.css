@@ -113,29 +113,26 @@ code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #
   align-items: flex-start;
 }
 
-/* fila di figli */
+/* fila di figli — sviluppo verticale */
 .tree-children {
   display: flex;
-  flex-direction: row;
-  gap: 0;
+  flex-direction: column;
+  gap: 4px;
   padding-left: 28px;
-  margin-top: 0;
+  padding-top: 4px;
+  padding-bottom: 4px;
   border-left: 2px solid var(--border);
   margin-left: 12px;
-  padding-top: 6px;
-  padding-bottom: 6px;
-  flex-wrap: nowrap;
+  margin-top: 4px;
 }
 
-/* ogni nodo figlio nella fila */
+/* ogni nodo figlio */
 .tree-children > .tree-node-wrap {
   position: relative;
   padding-left: 20px;
-  margin-top: 4px;
-  margin-bottom: 4px;
 }
 
-/* linea orizzontale che connette i figli al ramo verticale */
+/* linea orizzontale dal ramo verticale alla card */
 .tree-children > .tree-node-wrap::before {
   content: '';
   position: absolute;
