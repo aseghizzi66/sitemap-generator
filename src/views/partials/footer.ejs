@@ -1,2 +1,22 @@
+<div id="img-overlay" onclick="closeImg()">
+  <div id="img-box" onclick="event.stopPropagation()">
+    <button id="img-close" onclick="closeImg()">&#x2715;</button>
+    <p id="img-title"></p>
+    <img id="img-src" src="" alt="">
+  </div>
+</div>
+<script>
+function showImg(src, name) {
+  document.getElementById('img-src').src = src;
+  document.getElementById('img-title').textContent = name;
+  document.getElementById('img-overlay').classList.add('active');
+  return false;
+}
+function closeImg() {
+  document.getElementById('img-overlay').classList.remove('active');
+  document.getElementById('img-src').src = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeImg(); });
+</script>
 </body>
 </html>

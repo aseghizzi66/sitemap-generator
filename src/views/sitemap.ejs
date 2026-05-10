@@ -27,7 +27,14 @@ for (const item of allItems) {
         <tbody>
           <% for (const t of templates) { %>
             <tr>
-              <td><span class="badge badge-<%= t.name %>"><%= t.name %></span></td>
+              <td>
+                <% if (t.image_id) { %>
+                  <a class="badge badge-<%= t.name %> badge-link" href="#"
+                     onclick="showImg('/templates/image/<%= t.image_id %>','<%= t.name %>')"><%= t.name %></a>
+                <% } else { %>
+                  <span class="badge badge-<%= t.name %>"><%= t.name %></span>
+                <% } %>
+              </td>
               <td><%= t.description %></td>
               <td class="col-num"><%= t.usage_count %></td>
             </tr>
@@ -47,7 +54,14 @@ for (const item of allItems) {
         <tbody>
           <% for (const e of elements) { %>
             <tr>
-              <td><span class="badge badge-<%= e.name %>"><%= e.name %></span></td>
+              <td>
+                <% if (e.image_id) { %>
+                  <a class="badge badge-<%= e.name %> badge-link" href="#"
+                     onclick="showImg('/templates/image/<%= e.image_id %>','<%= e.name %>')"><%= e.name %></a>
+                <% } else { %>
+                  <span class="badge badge-<%= e.name %>"><%= e.name %></span>
+                <% } %>
+              </td>
               <td><%= e.description %></td>
               <td class="col-num"><%= e.usage_count %></td>
             </tr>
@@ -84,9 +98,16 @@ const iconAdd  = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" st
 const iconDel  = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`;
 
 const tplDesc = {};
-for (const t of templates) tplDesc[t.name] = t.description || '';
+const imgMap  = {};
+for (const t of templates) {
+  tplDesc[t.name] = t.description || '';
+  if (t.image_id) imgMap[t.name] = t.image_id;
+}
 const elDesc = {};
-for (const e of elements)  elDesc[e.name]  = e.description || '';
+for (const e of elements) {
+  elDesc[e.name] = e.description || '';
+  if (e.image_id) imgMap[e.name] = e.image_id;
+}
 
 function renderNode(node, depth) {
   const tpl       = node.template || 'def';
@@ -120,10 +141,19 @@ function renderNode(node, depth) {
         h += `<div class="tree-card-body card-body-${tpl}">`;
         if (isLocked) h += `<span class="lock-icon" title="Pagina riservata">🔒</span> `;
         h += `<span class="card-label">${node.label}</span>`;
-        h += `<div class="card-tpl"><span class="badge badge-${tpl}" title="${tplDesc[tpl] || ''}">${tpl}</span></div>`;
+        const tplTag = imgMap[tpl]
+          ? `<a class="badge badge-${tpl} badge-link" href="#" onclick="showImg('/templates/image/${imgMap[tpl]}','${tpl}')" title="${tplDesc[tpl] || ''}">${tpl}</a>`
+          : `<span class="badge badge-${tpl}" title="${tplDesc[tpl] || ''}">${tpl}</span>`;
+        h += `<div class="card-tpl">${tplTag}</div>`;
         if (node.elements && node.elements.length > 0) {
           h += `<div class="card-elems">`;
-          for (const el of node.elements) h += `<span class="badge badge-${el}" title="${elDesc[el] || ''}">${el}</span> `;
+          for (const el of node.elements) {
+            if (imgMap[el]) {
+              h += `<a class="badge badge-${el} badge-link" href="#" onclick="showImg('/templates/image/${imgMap[el]}','${el}')" title="${elDesc[el] || ''}">${el}</a> `;
+            } else {
+              h += `<span class="badge badge-${el}" title="${elDesc[el] || ''}">${el}</span> `;
+            }
+          }
           h += `</div>`;
         }
         if (node.version) h += `<div class="card-ver">v${node.version}</div>`;

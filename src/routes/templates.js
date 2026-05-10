@@ -1,6 +1,8 @@
 const express = require('express');
 const router  = express.Router();
 const db      = require('../db');
+const multer  = require('multer');
+const upload  = multer({ storage: multer.memoryStorage(), limits: { fileSize: 10 * 1024 * 1024 } });
 
 // ── GET / — lista template e elementi ─────────────────────
 
@@ -9,15 +11,72 @@ router.get('/', async (req, res, next) => {
     const { projectId } = req.query;
     if (!projectId) return res.redirect('/');
 
-    const { rows: [project]  } = await db.query('SELECT * FROM projects WHERE id = $1', [projectId]);
-    const { rows: templates  } = await db.query('SELECT * FROM the_templates WHERE project_id = $1 ORDER BY name', [projectId]);
-    const { rows: elements   } = await db.query('SELECT * FROM the_elements  WHERE project_id = $1 ORDER BY name', [projectId]);
+    const { rows: [project] } = await db.query('SELECT * FROM projects WHERE id = $1', [projectId]);
+    const { rows: templates } = await db.query(`
+      SELECT t.*, i.id AS image_id
+      FROM the_templates t
+      LEFT JOIN item_images i
+        ON i.project_id = t.project_id AND i.item_type = 'template' AND i.item_name = t.name
+      WHERE t.project_id = $1 ORDER BY t.name
+    `, [projectId]);
+    const { rows: elements } = await db.query(`
+      SELECT e.*, i.id AS image_id
+      FROM the_elements e
+      LEFT JOIN item_images i
+        ON i.project_id = e.project_id AND i.item_type = 'element' AND i.item_name = e.name
+      WHERE e.project_id = $1 ORDER BY e.name
+    `, [projectId]);
 
     const colorMap = {};
     for (const t of templates) colorMap[t.name] = { bg: t.color, fg: t.text_color };
     for (const e of elements)  colorMap[e.name] = { bg: e.color, fg: e.text_color };
 
     res.render('edit-templates', { project, templates, elements, colorMap, msg: req.query.msg || '' });
+  } catch (err) { next(err); }
+});
+
+// ── GET /image/:id ────────────────────────────────────────
+
+router.get('/image/:id', async (req, res, next) => {
+  try {
+    const { rows: [img] } = await db.query(
+      'SELECT filename, mimetype, data FROM item_images WHERE id = $1',
+      [req.params.id]
+    );
+    if (!img) return res.status(404).send('Non trovata');
+    res.setHeader('Content-Type', img.mimetype);
+    res.setHeader('Cache-Control', 'public, max-age=3600');
+    res.send(img.data);
+  } catch (err) { next(err); }
+});
+
+// ── POST /image/upload ────────────────────────────────────
+
+router.post('/image/upload', upload.single('image'), async (req, res, next) => {
+  try {
+    const { projectId, itemType, itemName } = req.body;
+    const file = req.file;
+    if (!file) return res.redirect(`/templates?projectId=${projectId}`);
+    await db.query(`
+      INSERT INTO item_images (project_id, item_type, item_name, filename, mimetype, data)
+      VALUES ($1,$2,$3,$4,$5,$6)
+      ON CONFLICT (project_id, item_type, item_name)
+      DO UPDATE SET filename=$4, mimetype=$5, data=$6
+    `, [projectId, itemType, itemName, file.originalname, file.mimetype, file.buffer]);
+    res.redirect(`/templates?projectId=${projectId}`);
+  } catch (err) { next(err); }
+});
+
+// ── POST /image/delete ────────────────────────────────────
+
+router.post('/image/delete', async (req, res, next) => {
+  try {
+    const { projectId, itemType, itemName } = req.body;
+    await db.query(
+      'DELETE FROM item_images WHERE project_id=$1 AND item_type=$2 AND item_name=$3',
+      [projectId, itemType, itemName]
+    );
+    res.redirect(`/templates?projectId=${projectId}`);
   } catch (err) { next(err); }
 });
 

@@ -40,22 +40,26 @@ async function getContext(projectId) {
   );
 
   const { rows: templates } = await db.query(`
-    SELECT t.*, COALESCE(u.cnt, 0)::int AS usage_count
+    SELECT t.*, COALESCE(u.cnt, 0)::int AS usage_count, i.id AS image_id
     FROM the_templates t
     LEFT JOIN (
       SELECT template, project_id, COUNT(*)::int AS cnt
       FROM the_site_map GROUP BY template, project_id
     ) u ON u.template = t.name AND u.project_id = t.project_id
+    LEFT JOIN item_images i
+      ON i.project_id = t.project_id AND i.item_type = 'template' AND i.item_name = t.name
     WHERE t.project_id = $1 ORDER BY t.name
   `, [projectId]);
 
   const { rows: elements } = await db.query(`
-    SELECT e.*, COALESCE(u.cnt, 0)::int AS usage_count
+    SELECT e.*, COALESCE(u.cnt, 0)::int AS usage_count, i.id AS image_id
     FROM the_elements e
     LEFT JOIN (
       SELECT element, project_id, COUNT(*)::int AS cnt
       FROM list_elements GROUP BY element, project_id
     ) u ON u.element = e.name AND u.project_id = e.project_id
+    LEFT JOIN item_images i
+      ON i.project_id = e.project_id AND i.item_type = 'element' AND i.item_name = e.name
     WHERE e.project_id = $1 ORDER BY e.name
   `, [projectId]);
 

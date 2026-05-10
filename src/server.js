@@ -55,6 +55,29 @@ async function runMigrations() {
     `);
     console.log('Tabella page_attachments creata.');
   }
+
+  const { rows: r3 } = await db.query(`
+    SELECT EXISTS (
+      SELECT FROM information_schema.tables
+      WHERE table_schema = 'public' AND table_name = 'item_images'
+    )
+  `);
+  if (!r3[0].exists) {
+    await db.query(`
+      CREATE TABLE item_images (
+        id         SERIAL PRIMARY KEY,
+        project_id INTEGER NOT NULL,
+        item_type  VARCHAR(10)  NOT NULL,
+        item_name  VARCHAR(100) NOT NULL,
+        filename   VARCHAR(255) NOT NULL,
+        mimetype   VARCHAR(100) NOT NULL,
+        data       BYTEA NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW(),
+        UNIQUE (project_id, item_type, item_name)
+      )
+    `);
+    console.log('Tabella item_images creata.');
+  }
 }
 
 const PORT = process.env.PORT || 3000;

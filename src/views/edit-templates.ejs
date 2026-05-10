@@ -19,7 +19,7 @@ for (const e of elements)  dynamicCss += `.badge-${e.name}{background:#${e.color
     <thead>
       <tr>
         <th>Nome</th><th>Descrizione</th><th>Dettaglio</th>
-        <th>Colore BG</th><th>Colore testo</th><th>Anteprima</th><th></th>
+        <th>Colore BG</th><th>Colore testo</th><th>Anteprima</th><th>Immagine</th><th></th>
       </tr>
     </thead>
     <tbody>
@@ -39,6 +39,26 @@ for (const e of elements)  dynamicCss += `.badge-${e.name}{background:#${e.color
           </td>
           <td></td><td></td><td></td>
           <td><span class="badge badge-<%= t.name %>">Abc</span></td>
+          <td class="img-cell">
+            <% if (t.image_id) { %>
+              <img src="/templates/image/<%= t.image_id %>" class="img-thumb"
+                   onclick="showImg('/templates/image/<%= t.image_id %>','<%= t.name %>')" title="Clicca per ingrandire">
+              <form method="POST" action="/templates/image/delete">
+                <input type="hidden" name="projectId" value="<%= project.id %>">
+                <input type="hidden" name="itemType"  value="template">
+                <input type="hidden" name="itemName"  value="<%= t.name %>">
+                <button class="btn btn-sm btn-danger">Rimuovi</button>
+              </form>
+            <% } else { %>
+              <form method="POST" action="/templates/image/upload" enctype="multipart/form-data" class="img-upload-form">
+                <input type="hidden" name="projectId" value="<%= project.id %>">
+                <input type="hidden" name="itemType"  value="template">
+                <input type="hidden" name="itemName"  value="<%= t.name %>">
+                <input type="file" name="image" accept="image/*" class="img-file-input" onchange="this.form.submit()">
+                <label class="btn btn-sm btn-secondary img-file-label">Scegli<input type="file" name="image" accept="image/*" style="display:none" onchange="this.form.submit()"></label>
+              </form>
+            <% } %>
+          </td>
           <td>
             <% if (t.name !== 'def') { %>
               <form method="POST" action="/templates/template/delete"
@@ -82,7 +102,7 @@ for (const e of elements)  dynamicCss += `.badge-${e.name}{background:#${e.color
     <thead>
       <tr>
         <th>Nome</th><th>Descrizione</th><th>Dettaglio</th>
-        <th>Colore BG</th><th>Colore testo</th><th>Anteprima</th><th></th>
+        <th>Colore BG</th><th>Colore testo</th><th>Anteprima</th><th>Immagine</th><th></th>
       </tr>
     </thead>
     <tbody>
@@ -102,6 +122,25 @@ for (const e of elements)  dynamicCss += `.badge-${e.name}{background:#${e.color
           </td>
           <td></td><td></td><td></td>
           <td><span class="badge badge-<%= e.name %>">Abc</span></td>
+          <td class="img-cell">
+            <% if (e.image_id) { %>
+              <img src="/templates/image/<%= e.image_id %>" class="img-thumb"
+                   onclick="showImg('/templates/image/<%= e.image_id %>','<%= e.name %>')" title="Clicca per ingrandire">
+              <form method="POST" action="/templates/image/delete">
+                <input type="hidden" name="projectId" value="<%= project.id %>">
+                <input type="hidden" name="itemType"  value="element">
+                <input type="hidden" name="itemName"  value="<%= e.name %>">
+                <button class="btn btn-sm btn-danger">Rimuovi</button>
+              </form>
+            <% } else { %>
+              <form method="POST" action="/templates/image/upload" enctype="multipart/form-data" class="img-upload-form">
+                <input type="hidden" name="projectId" value="<%= project.id %>">
+                <input type="hidden" name="itemType"  value="element">
+                <input type="hidden" name="itemName"  value="<%= e.name %>">
+                <label class="btn btn-sm btn-secondary">Scegli<input type="file" name="image" accept="image/*" style="display:none" onchange="this.form.submit()"></label>
+              </form>
+            <% } %>
+          </td>
           <td>
             <form method="POST" action="/templates/element/delete"
                   onsubmit="return confirm('Eliminare l\\'elemento <%= e.name %>?')">
