@@ -155,6 +155,18 @@ code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #
   background: var(--border);
 }
 
+/* nasconde il border-left sotto l'ultimo figlio */
+.tree-children > .tree-node-wrap:last-child::after {
+  content: '';
+  position: absolute;
+  left: -2px;
+  top: 29px;
+  bottom: -100px;
+  width: 2px;
+  background: var(--bg);
+  z-index: 1;
+}
+
 /* card singola pagina */
 .tree-card {
   border: 1px solid var(--border);
@@ -217,10 +229,11 @@ code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #
 
 /* ── Tree children: layout orizzontale ────────────────── */
 .tree-children.horizontal {
+  position: relative;          /* serve per ::before e per le linee JS */
   flex-direction: row;
   flex-wrap: wrap;
   align-items: flex-start;
-  border-left: 2px solid var(--border);  /* parte verticale della L */
+  border-left: none;           /* gestito da ::before con altezza fissa */
   border-top: none;
   margin-left: 40px;
   padding-left: 0;
@@ -229,7 +242,19 @@ code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #
   gap: 12px;
 }
 
-/* di default nessun connettore */
+/* Parte verticale della L: altezza fissa — non si estende oltre le card */
+.tree-children.horizontal:not(:has(> .tree-node-wrap:only-child))::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 2px;
+  height: 32px;
+  background: var(--border);
+  pointer-events: none;
+}
+
+/* Di default nessun connettore sui figli */
 .tree-children.horizontal > .tree-node-wrap {
   padding-left: 0;
 }
@@ -237,11 +262,11 @@ code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #
   display: none;
 }
 
-/* PRIMO figlio: tratto orizzontale della L (da border-left alla card) */
-.tree-children.horizontal > .tree-node-wrap:first-child {
+/* PRIMO figlio (con fratelli): tratto orizzontale della L */
+.tree-children.horizontal:not(:has(> .tree-node-wrap:only-child)) > .tree-node-wrap:first-child {
   padding-left: 20px;
 }
-.tree-children.horizontal > .tree-node-wrap:first-child::before {
+.tree-children.horizontal:not(:has(> .tree-node-wrap:only-child)) > .tree-node-wrap:first-child::before {
   display: block;
   left: 0;
   top: 28px;
@@ -249,24 +274,12 @@ code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #
   height: 1px;
 }
 
-/* FRATELLI successivi: linea orizzontale che riempie il gap (12px) */
-.tree-children.horizontal > .tree-node-wrap:not(:first-child)::before {
-  display: block;
-  left: -12px;
-  top: 28px;
-  width: 12px;
+/* Linee tra fratelli disegnate via JS (misura posizioni reali delle card) */
+.h-sibling-line {
+  position: absolute;
   height: 1px;
-}
-
-/* FIGLIO UNICO: nessuna L (nessun fratello da connettere) */
-.tree-children.horizontal:has(> .tree-node-wrap:only-child) {
-  border-left: none;
-}
-.tree-children.horizontal:has(> .tree-node-wrap:only-child) > .tree-node-wrap:first-child {
-  padding-left: 0;
-}
-.tree-children.horizontal:has(> .tree-node-wrap:only-child) > .tree-node-wrap:first-child::before {
-  display: none;
+  background: var(--border);
+  pointer-events: none;
 }
 
 /* ── Add/Aggiungi sezione collassabile ─────────────────── */
