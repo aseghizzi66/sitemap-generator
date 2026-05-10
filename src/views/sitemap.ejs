@@ -147,6 +147,30 @@ for (const root of tree) {
 </div>
 
 <script>
+function drawSiblingConnectors() {
+  document.querySelectorAll('.h-sibling-line').forEach(el => el.remove());
+  document.querySelectorAll('.tree-children.horizontal').forEach(container => {
+    const children = [...container.querySelectorAll(':scope > .tree-node-wrap')];
+    if (children.length < 2) return;
+    const containerRect = container.getBoundingClientRect();
+    for (let i = 0; i < children.length - 1; i++) {
+      const card1 = children[i].querySelector('.tree-card');
+      const card2 = children[i + 1].querySelector('.tree-card');
+      if (!card1 || !card2) continue;
+      const r1 = card1.getBoundingClientRect();
+      const r2 = card2.getBoundingClientRect();
+      const y    = r1.top - containerRect.top + 28;
+      const left = r1.right - containerRect.left;
+      const w    = r2.left - r1.right;
+      if (w <= 0) continue;
+      const line = document.createElement('div');
+      line.className = 'h-sibling-line';
+      line.style.cssText = `left:${left}px;top:${y}px;width:${w}px;`;
+      container.appendChild(line);
+    }
+  });
+}
+
 function applyTreeLayout() {
   const val       = document.getElementById('layoutSelect').value;
   const fromLevel = val === 'never' ? Infinity : parseInt(val);
@@ -155,6 +179,7 @@ function applyTreeLayout() {
     el.classList.toggle('horizontal', level >= fromLevel);
   });
   localStorage.setItem('sitemapLayout', val);
+  requestAnimationFrame(drawSiblingConnectors);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
