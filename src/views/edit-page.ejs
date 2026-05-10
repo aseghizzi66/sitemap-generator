@@ -70,6 +70,45 @@ for (const item of allItems) {
       <a href="/sitemap?projectId=<%= project.id %>" class="btn btn-secondary">Annulla</a>
     </div>
   </form>
+
+  <hr class="section-sep">
+  <h2 class="section-title">Allegati</h2>
+
+  <% if (attachments.length > 0) { %>
+    <table class="data-table" style="margin-bottom:16px;max-width:700px">
+      <thead>
+        <tr><th>File</th><th>Tipo</th><th>Dimensione</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% for (const att of attachments) { %>
+          <tr>
+            <td><a href="/sitemap/attachment/<%= att.id %>" class="link-accent"><%= att.filename %></a></td>
+            <td><code><%= att.mimetype %></code></td>
+            <td class="col-num"><%= (att.size / 1024).toFixed(1) %> KB</td>
+            <td>
+              <form method="POST" action="/sitemap/delete-attachment" style="display:inline">
+                <input type="hidden" name="projectId"    value="<%= project.id %>">
+                <input type="hidden" name="pageId"       value="<%= page.id %>">
+                <input type="hidden" name="attachmentId" value="<%= att.id %>">
+                <button type="submit" class="btn btn-sm btn-danger">Elimina</button>
+              </form>
+            </td>
+          </tr>
+        <% } %>
+      </tbody>
+    </table>
+  <% } else { %>
+    <p class="muted" style="margin-bottom:14px">Nessun allegato.</p>
+  <% } %>
+
+  <form method="POST" action="/sitemap/upload-attachment" enctype="multipart/form-data">
+    <input type="hidden" name="projectId" value="<%= project.id %>">
+    <input type="hidden" name="pageId"    value="<%= page.id %>">
+    <div class="inline-form-row">
+      <input type="file" name="files" multiple class="field-text" style="max-width:420px">
+      <button type="submit" class="btn btn-secondary btn-sm">Carica</button>
+    </div>
+  </form>
 </div>
 
 <%- include('partials/footer') %>

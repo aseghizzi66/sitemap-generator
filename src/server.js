@@ -33,6 +33,28 @@ async function runMigrations() {
     await db.query(sql);
     console.log('Database inizializzato.');
   }
+
+  const { rows: r2 } = await db.query(`
+    SELECT EXISTS (
+      SELECT FROM information_schema.tables
+      WHERE table_schema = 'public' AND table_name = 'page_attachments'
+    )
+  `);
+  if (!r2[0].exists) {
+    await db.query(`
+      CREATE TABLE page_attachments (
+        id         SERIAL PRIMARY KEY,
+        project_id INTEGER NOT NULL,
+        page_id    VARCHAR(100) NOT NULL,
+        filename   VARCHAR(255) NOT NULL,
+        mimetype   VARCHAR(100) NOT NULL,
+        size       INTEGER NOT NULL,
+        data       BYTEA NOT NULL,
+        created_at TIMESTAMPTZ DEFAULT NOW()
+      )
+    `);
+    console.log('Tabella page_attachments creata.');
+  }
 }
 
 const PORT = process.env.PORT || 3000;

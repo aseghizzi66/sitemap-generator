@@ -1,6 +1,8 @@
 const express = require('express');
 const router  = express.Router();
 const db      = require('../db');
+const multer  = require('multer');
+const upload  = multer({ storage: multer.memoryStorage(), limits: { fileSize: 20 * 1024 * 1024 } });
 
 // ── helpers ────────────────────────────────────────────────
 
@@ -142,6 +144,49 @@ router.post('/delete', async (req, res, next) => {
   } catch (err) { next(err); }
 });
 
+// ── GET /attachment/:id ────────────────────────────────────
+
+router.get('/attachment/:id', async (req, res, next) => {
+  try {
+    const { rows: [att] } = await db.query(
+      'SELECT filename, mimetype, data FROM page_attachments WHERE id = $1',
+      [req.params.id]
+    );
+    if (!att) return res.status(404).send('Non trovato');
+    res.setHeader('Content-Disposition', `attachment; filename="${att.filename}"`);
+    res.setHeader('Content-Type', att.mimetype);
+    res.send(att.data);
+  } catch (err) { next(err); }
+});
+
+// ── POST /upload-attachment ────────────────────────────────
+
+router.post('/upload-attachment', upload.array('files'), async (req, res, next) => {
+  try {
+    const { projectId, pageId } = req.body;
+    for (const file of req.files || []) {
+      await db.query(
+        'INSERT INTO page_attachments (project_id, page_id, filename, mimetype, size, data) VALUES ($1,$2,$3,$4,$5,$6)',
+        [projectId, pageId, file.originalname, file.mimetype, file.size, file.buffer]
+      );
+    }
+    res.redirect(`/sitemap/edit?projectId=${projectId}&pageId=${encodeURIComponent(pageId)}`);
+  } catch (err) { next(err); }
+});
+
+// ── POST /delete-attachment ────────────────────────────────
+
+router.post('/delete-attachment', async (req, res, next) => {
+  try {
+    const { projectId, pageId, attachmentId } = req.body;
+    await db.query(
+      'DELETE FROM page_attachments WHERE id = $1 AND project_id = $2',
+      [attachmentId, projectId]
+    );
+    res.redirect(`/sitemap/edit?projectId=${projectId}&pageId=${encodeURIComponent(pageId)}`);
+  } catch (err) { next(err); }
+});
+
 // ── GET /edit ──────────────────────────────────────────────
 
 router.get('/edit', async (req, res, next) => {
@@ -157,10 +202,15 @@ router.get('/edit', async (req, res, next) => {
       'SELECT element FROM list_elements WHERE project_id = $1 AND page_id = $2 ORDER BY sort_order',
       [projectId, pageId]
     );
+    const { rows: attachments } = await db.query(
+      'SELECT id, filename, mimetype, size FROM page_attachments WHERE project_id = $1 AND page_id = $2 ORDER BY created_at',
+      [projectId, pageId]
+    );
 
     res.render('edit-page', {
       project, templates, elements, page,
       pageElements: pageElems.map(e => e.element),
+      attachments,
     });
   } catch (err) { next(err); }
 });
