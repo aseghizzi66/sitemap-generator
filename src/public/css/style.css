@@ -242,8 +242,8 @@ code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #
   gap: 12px;
 }
 
-/* Parte verticale della L: altezza fissa — non si estende oltre le card */
-.tree-children.horizontal:not(:has(> .tree-node-wrap:only-child))::before {
+/* Parte verticale della L: altezza fissa */
+.tree-children.horizontal::before {
   content: '';
   position: absolute;
   left: 0;
@@ -262,11 +262,11 @@ code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #
   display: none;
 }
 
-/* PRIMO figlio (con fratelli): tratto orizzontale della L */
-.tree-children.horizontal:not(:has(> .tree-node-wrap:only-child)) > .tree-node-wrap:first-child {
+/* Primo figlio: tratto orizzontale della L (sempre, anche figlio unico) */
+.tree-children.horizontal > .tree-node-wrap:first-child {
   padding-left: 20px;
 }
-.tree-children.horizontal:not(:has(> .tree-node-wrap:only-child)) > .tree-node-wrap:first-child::before {
+.tree-children.horizontal > .tree-node-wrap:first-child::before {
   display: block;
   left: 0;
   top: 28px;
