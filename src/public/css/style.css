@@ -229,7 +229,7 @@ code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #
   gap: 12px;
 }
 
-/* di default i figli orizzontali non hanno connettore */
+/* di default nessun connettore */
 .tree-children.horizontal > .tree-node-wrap {
   padding-left: 0;
 }
@@ -237,7 +237,7 @@ code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #
   display: none;
 }
 
-/* solo il PRIMO figlio ha il tratto orizzontale della L */
+/* PRIMO figlio: tratto orizzontale della L (da border-left alla card) */
 .tree-children.horizontal > .tree-node-wrap:first-child {
   padding-left: 20px;
 }
@@ -247,6 +247,26 @@ code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #
   top: 28px;
   width: 20px;
   height: 1px;
+}
+
+/* FRATELLI successivi: linea orizzontale che riempie il gap (12px) */
+.tree-children.horizontal > .tree-node-wrap:not(:first-child)::before {
+  display: block;
+  left: -12px;
+  top: 28px;
+  width: 12px;
+  height: 1px;
+}
+
+/* FIGLIO UNICO: nessuna L (nessun fratello da connettere) */
+.tree-children.horizontal:has(> .tree-node-wrap:only-child) {
+  border-left: none;
+}
+.tree-children.horizontal:has(> .tree-node-wrap:only-child) > .tree-node-wrap:first-child {
+  padding-left: 0;
+}
+.tree-children.horizontal:has(> .tree-node-wrap:only-child) > .tree-node-wrap:first-child::before {
+  display: none;
 }
 
 /* ── Add/Aggiungi sezione collassabile ─────────────────── */
