@@ -220,18 +220,33 @@ code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #
   flex-direction: row;
   flex-wrap: wrap;
   align-items: flex-start;
-  border-left: none;
-  border-top: 2px solid var(--border);
-  margin-left: 40px;    /* stessa indentazione del verticale */
+  border-left: 2px solid var(--border);  /* parte verticale della L */
+  border-top: none;
+  margin-left: 40px;
   padding-left: 0;
-  padding-top: 10px;
+  padding-top: 4px;
+  padding-bottom: 4px;
   gap: 12px;
 }
+
+/* di default i figli orizzontali non hanno connettore */
 .tree-children.horizontal > .tree-node-wrap {
   padding-left: 0;
 }
 .tree-children.horizontal > .tree-node-wrap::before {
   display: none;
+}
+
+/* solo il PRIMO figlio ha il tratto orizzontale della L */
+.tree-children.horizontal > .tree-node-wrap:first-child {
+  padding-left: 20px;
+}
+.tree-children.horizontal > .tree-node-wrap:first-child::before {
+  display: block;
+  left: 0;
+  top: 28px;
+  width: 20px;
+  height: 1px;
 }
 
 /* ── Add/Aggiungi sezione collassabile ─────────────────── */
