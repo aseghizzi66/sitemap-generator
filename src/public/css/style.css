@@ -103,6 +103,18 @@ code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #
 .info-panel  { min-width: 220px; }
 .info-panel-header { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .6px; color: var(--muted); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
 
+/* ── Toolbar layout ────────────────────────────────────── */
+.tree-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 20px;
+  background: #f8f9fa;
+  border-bottom: 1px solid var(--border);
+}
+.toolbar-label  { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.toolbar-select { width: auto; font-size: 12px; padding: 3px 8px; }
+
 /* ── TREE ──────────────────────────────────────────────── */
 .tree-container { padding: 20px; overflow-x: auto; }
 
@@ -202,6 +214,25 @@ code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #
 .card-elems  { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 2px; }
 .card-ver    { font-size: 10px; color: var(--muted); margin-top: 4px; }
 .lock-icon   { font-size: 10px; }
+
+/* ── Tree children: layout orizzontale ────────────────── */
+.tree-children.horizontal {
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  border-left: none;
+  border-top: 2px solid var(--border);
+  margin-left: 0;
+  padding-left: 0;
+  padding-top: 10px;
+  gap: 12px;
+}
+.tree-children.horizontal > .tree-node-wrap {
+  padding-left: 0;
+}
+.tree-children.horizontal > .tree-node-wrap::before {
+  display: none;
+}
 
 /* ── Add/Aggiungi sezione collassabile ─────────────────── */
 .add-section { margin-top: 12px; }

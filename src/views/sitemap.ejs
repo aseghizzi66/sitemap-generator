@@ -60,6 +60,20 @@ for (const item of allItems) {
 </div>
 
 <%/* ─────────────────────────────────────────────────────────────
+     TOOLBAR — controllo layout orizzontale
+────────────────────────────────────────────────────────────── */%>
+<div class="tree-toolbar">
+  <label for="layoutSelect" class="toolbar-label">Mostra in orizzontale</label>
+  <select id="layoutSelect" class="field-select toolbar-select" onchange="applyTreeLayout()">
+    <option value="never">Mai</option>
+    <option value="1">Sempre (dal 1° livello)</option>
+    <option value="2">Dal 2° livello</option>
+    <option value="3">Dal 3° livello</option>
+    <option value="4">Dal 4° livello</option>
+  </select>
+</div>
+
+<%/* ─────────────────────────────────────────────────────────────
      TREE — funzione ricorsiva EJS
 ────────────────────────────────────────────────────────────── */%>
 <div class="tree-container">
@@ -69,19 +83,17 @@ const iconEdit = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" st
 const iconAdd  = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`;
 const iconDel  = `<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`;
 
-function renderNode(node) {
-  const tpl      = node.template || 'def';
-  const isLocked = node.locked;
+function renderNode(node, depth) {
+  const tpl       = node.template || 'def';
+  const isLocked  = node.locked;
   const canDelete = node.id !== '0';
-  const pid      = project.id;
+  const pid       = project.id;
 
   let h = '';
   h += `<div class="tree-node-wrap">`;
 
-    // colonna: icone sopra, card sotto
     h += `<div class="tree-card-row">`;
 
-      // icone in alto a destra
       h += `<div class="node-actions">`;
         h += `<a href="/sitemap/edit?projectId=${pid}&pageId=${encodeURIComponent(node.id)}" class="act act-edit" title="Modifica">${iconEdit}</a>`;
         h += `<form method="POST" action="/sitemap/add" class="act-form">
@@ -96,39 +108,30 @@ function renderNode(node) {
             <button class="act act-del" title="Elimina">${iconDel}</button>
           </form>`;
         }
-      h += `</div>`; // node-actions
+      h += `</div>`;
 
-      // card
       h += `<div class="tree-card">`;
-        h += `<div class="tree-card-head">`;
-          h += `<span class="node-id">${node.id}</span>`;
-        h += `</div>`;
-
-        // body card
+        h += `<div class="tree-card-head"><span class="node-id">${node.id}</span></div>`;
         h += `<div class="tree-card-body card-body-${tpl}">`;
         if (isLocked) h += `<span class="lock-icon" title="Pagina riservata">🔒</span> `;
         h += `<span class="card-label">${node.label}</span>`;
         h += `<div class="card-tpl"><span class="badge badge-${tpl}">${tpl}</span></div>`;
         if (node.elements && node.elements.length > 0) {
           h += `<div class="card-elems">`;
-          for (const el of node.elements) {
-            h += `<span class="badge badge-${el}">${el}</span> `;
-          }
+          for (const el of node.elements) h += `<span class="badge badge-${el}">${el}</span> `;
           h += `</div>`;
         }
-        if (node.version) {
-          h += `<div class="card-ver">v${node.version}</div>`;
-        }
-      h += `</div>`; // tree-card-body
-      h += `</div>`; // tree-card
+        if (node.version) h += `<div class="card-ver">v${node.version}</div>`;
+        h += `</div>`;
+      h += `</div>`;
 
-    h += `</div>`; // tree-card-row
+    h += `</div>`;
 
-    // ricorsione figli
     if (node.children && node.children.length > 0) {
-      h += `<div class="tree-children">`;
+      // data-level = profondità dei figli (1 = figli del root, 2 = nipoti, ...)
+      h += `<div class="tree-children" data-level="${depth + 1}">`;
       for (const child of node.children) {
-        h += renderNode(child);
+        h += renderNode(child, depth + 1);
       }
       h += `</div>`;
     }
@@ -138,9 +141,30 @@ function renderNode(node) {
 }
 
 for (const root of tree) {
-  %><%- renderNode(root) %><%
+  %><%- renderNode(root, 0) %><%
 }
 %>
 </div>
+
+<script>
+function applyTreeLayout() {
+  const val       = document.getElementById('layoutSelect').value;
+  const fromLevel = val === 'never' ? Infinity : parseInt(val);
+  document.querySelectorAll('.tree-children').forEach(el => {
+    const level = parseInt(el.dataset.level);
+    el.classList.toggle('horizontal', level >= fromLevel);
+  });
+  localStorage.setItem('sitemapLayout', val);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const saved = localStorage.getItem('sitemapLayout');
+  if (saved) {
+    const sel = document.getElementById('layoutSelect');
+    if (sel) sel.value = saved;
+  }
+  applyTreeLayout();
+});
+</script>
 
 <%- include('partials/footer') %>
