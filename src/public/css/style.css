@@ -223,6 +223,7 @@ code { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12px; color: #
 .card-tpl    { margin-top: 3px; }
 .card-elems  { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 2px; }
 .card-ver    { font-size: 10px; color: var(--muted); margin-top: 4px; }
+.card-att    { font-size: 10px; color: var(--muted); margin-top: 4px; display: flex; align-items: center; gap: 3px; }
 .lock-icon   { font-size: 10px; }
 
 /* ── Tree children: layout orizzontale ────────────────── */

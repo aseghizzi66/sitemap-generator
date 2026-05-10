@@ -82,7 +82,15 @@ router.get('/', async (req, res, next) => {
 
     const existingIds = new Set(siteMapRaw.map(p => p.id));
 
-    // Attacca elementi e nextChildId ad ogni pagina
+    // Conteggio allegati per pagina
+    const { rows: attCounts } = await db.query(
+      'SELECT page_id, COUNT(*)::int AS cnt FROM page_attachments WHERE project_id = $1 GROUP BY page_id',
+      [projectId]
+    );
+    const attMap = {};
+    for (const r of attCounts) attMap[r.page_id] = r.cnt;
+
+    // Attacca elementi, allegati e nextChildId ad ogni pagina
     const siteMap = await Promise.all(siteMapRaw.map(async page => {
       const { rows: elems } = await db.query(
         'SELECT element FROM list_elements WHERE project_id = $1 AND page_id = $2 ORDER BY sort_order',
@@ -90,8 +98,9 @@ router.get('/', async (req, res, next) => {
       );
       return {
         ...page,
-        elements:   elems.map(e => e.element),
-        newChildId: nextChildId(page.id, existingIds),
+        elements:        elems.map(e => e.element),
+        newChildId:      nextChildId(page.id, existingIds),
+        attachmentCount: attMap[page.id] || 0,
       };
     }));
 
